@@ -115,3 +115,30 @@ Append-only record of design and tooling decisions. Every entry names the decisi
 - **Trade-offs accepted**: Users who want `toolChoice: 'required'` or a specific tool cannot do so via the block UI (L4+ work).
 - **Reversibility**: easy (add dropdown in L4+)
 - **Revisit when**: L4 if agents need fine-grained tool routing.
+
+## 2026-05-17T01:09:00Z — L4: generateText with stopWhen over ToolLoopAgent class
+
+- **Decision**: The `Agent` block compiles to `(await generateText({ model, prompt, tools, stopWhen })).text`, not `new ToolLoopAgent({ ... }).generate({ prompt })`.
+- **Alternatives considered**: `ToolLoopAgent` — a reusable class instantiated once with fixed config, called many times. Available since ai@6.0.0.
+- **Rationale**: (1) `generateText` with `stopWhen` is the canonical v6 one-shot agent pattern. (2) `ToolLoopAgent` is designed for applications that reuse an agent config across many requests (e.g., a Next.js route handler serving N users). Our blocks generate code executed once per program run — there is no reuse benefit. (3) `generateText` makes the entire agent loop visible in the emitted code (model, tools, stopWhen all in one call object). `ToolLoopAgent` hides the loop behind a class. (4) `generateText` is fully testable with `MockLanguageModelV3` without any class instantiation. (5) Both are v6-correct; `generateText` is the safer, more explicit choice.
+- **Trade-offs accepted**: If the generated code is eventually deployed as a server-side agent handling many concurrent requests, `ToolLoopAgent` would be more efficient (one config instance, not one `generateText` call per request). This is L5+ work.
+- **Reversibility**: easy (new block type or new codegen template)
+- **Revisit when**: L5 deploy-to-vercel — if agent blocks are used in server-side route handlers.
+
+## 2026-05-17T01:09:10Z — L4: Mutator for UseTools deferred
+
+- **Decision**: Skip the Blockly mutator pattern for `UseTools`. Keep the L3 fixed N=5 inputs (TOOL_0 through TOOL_4... actually L3 only has 3 slots — we keep the same).
+- **Alternatives considered**: Blockly mutator pattern: allows users to add/remove tool inputs dynamically via a UI button and a companion XML serializer.
+- **Rationale**: The Blockly mutator API (mixins, `decompose()`, `compose()`, `mutationToDom()`, `domToMutation()`) requires significant boilerplate and is poorly documented for custom blocks. Research estimated >30 minutes to implement correctly. The task contract explicitly says "Defer if mutators prove too complex — document and keep N=5 fixed inputs. The mutator is nice to have for L4; the agent/stream blocks are the must-have." The fixed N=3 inputs are sufficient for all L4 test scenarios.
+- **Trade-offs accepted**: Maximum 3 tools per UseTools block. For programs needing more tools, users must compose multiple UseTools blocks (not currently supported) or write code manually.
+- **Reversibility**: medium (requires adding mixin + serialization + UI, updating fixtures)
+- **Revisit when**: L5 or when users report needing more than 3 tools.
+
+## 2026-05-17T01:09:20Z — L4: textStream iteration via for await, NOT fullStream
+
+- **Decision**: `StreamSink` iterates `source.textStream` with `for await (const __chunk of ...)`.
+- **Alternatives considered**: `fullStream` — emits typed chunks including text, tool-call, tool-result, start/finish events, errors.
+- **Rationale**: (1) `textStream` is the simplest API — yields only text string deltas, exactly what a visual "stream output" block needs. (2) `fullStream` requires a switch statement on `part.type` to extract text, adding complexity the user can't configure visually. (3) The task contract specifically says "textStream" is the property name to use.
+- **Trade-offs accepted**: `StreamSink` cannot observe tool-calls or step-boundaries in the stream. For full observability, users would need a custom `for await` over `fullStream` — outside scope of visual blocks.
+- **Reversibility**: easy (add a separate `FullStreamSink` block if needed)
+- **Revisit when**: L5 if streaming agent observability (tool-calls, step events) is needed in the UI.
