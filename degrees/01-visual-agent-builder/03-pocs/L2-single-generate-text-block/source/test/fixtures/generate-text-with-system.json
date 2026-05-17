@@ -1,0 +1,54 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "ai_output_sink",
+        "id": "sink-1",
+        "x": 50,
+        "y": 50,
+        "fields": {
+          "LABEL": "output"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "ai_generate_text",
+              "id": "gen-1",
+              "inputs": {
+                "MODEL": {
+                  "block": {
+                    "type": "ai_model",
+                    "id": "model-1",
+                    "fields": {
+                      "PROVIDER": "anthropic",
+                      "NAME": "claude-haiku-4-5"
+                    }
+                  }
+                },
+                "PROMPT": {
+                  "block": {
+                    "type": "ai_prompt",
+                    "id": "prompt-1",
+                    "fields": {
+                      "TEXT": "Hello"
+                    }
+                  }
+                },
+                "SYSTEM": {
+                  "block": {
+                    "type": "ai_prompt",
+                    "id": "system-1",
+                    "fields": {
+                      "TEXT": "You are a helpful assistant."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
