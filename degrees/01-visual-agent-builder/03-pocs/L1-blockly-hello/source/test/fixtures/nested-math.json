@@ -1,0 +1,46 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "math_arithmetic",
+        "id": "top-mul",
+        "x": 50,
+        "y": 50,
+        "fields": { "OP": "MULTIPLY" },
+        "inputs": {
+          "A": {
+            "block": {
+              "type": "math_arithmetic",
+              "id": "inner-add",
+              "fields": { "OP": "ADD" },
+              "inputs": {
+                "A": {
+                  "block": {
+                    "type": "math_number",
+                    "id": "num-1",
+                    "fields": { "NUM": 1 }
+                  }
+                },
+                "B": {
+                  "block": {
+                    "type": "math_number",
+                    "id": "num-2",
+                    "fields": { "NUM": 2 }
+                  }
+                }
+              }
+            }
+          },
+          "B": {
+            "block": {
+              "type": "math_number",
+              "id": "num-3",
+              "fields": { "NUM": 3 }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
