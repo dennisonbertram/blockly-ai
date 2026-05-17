@@ -49,7 +49,10 @@ vi.mock('blockly/core', async (importOriginal) => {
   return {
     ...actual,
     Blocks: actual.Blocks,
+    // Mock inject so it doesn't crash in happy-dom (no real SVG support)
     inject: mockInject,
+    // Mock setLocale so the async IIFE in BlocklyWorkspace doesn't throw
+    setLocale: vi.fn(),
   }
 })
 

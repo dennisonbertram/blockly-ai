@@ -1,0 +1,23 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generate(workspace) — L5 codegen parity (carried from L4) > BT-L5-codegen-005: generate-text-basic snapshot 1`] = `
+"import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink } = {}) {
+  __sink?.('output', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Say hello' })).text);
+}
+"
+`;
+
+exports[`generate(workspace) — L5 codegen parity (carried from L4) > BT-L5-codegen-006: stream-text-basic snapshot 1`] = `
+"import { streamText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink } = {}) {
+  for await (const __chunk of (streamText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Hello' })).textStream) {
+    __sink?.('out', __chunk);
+  }
+}
+"
+`;
