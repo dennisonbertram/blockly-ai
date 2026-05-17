@@ -104,3 +104,13 @@ Append-only record of moments where reality diverged from prior expectation. The
 - **Source of reality**: `npm run build` TypeScript errors in tool.ts and run-emitted.ts.
 - **Impact**: Fixed by removing unused locals. Minor code cleanup.
 - **Follow-up**: Consider adding `tsc --noEmit` as a pre-test step in future POCs to catch TS errors before the build.
+
+## L-capstone: ai_prompt cannot emit dynamic expressions (blocks wiring limitation)
+
+- **Expected**: Agent result could be passed as input to GenerateObject prompt (research-first order).
+- **Actual**: ai_prompt only emits string literals. There is no block to concatenate a variable reference with a string literal.
+- **Source of expectation**: Task contract described 'Agent output as part of its prompt' for GenerateObject.
+- **Source of reality**: The ai_prompt block uses FieldTextInput which emits the literal text content only.
+- **Impact**: GenerateObject and Agent run independently (not chained). The demo still demonstrates all block categories.
+- **Follow-up**: A ConcatText or ExpressionRef block would enable dynamic prompt wiring in Phase 9.
+

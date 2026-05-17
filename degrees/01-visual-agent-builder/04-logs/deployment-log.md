@@ -29,3 +29,16 @@ Append-only record of deployments. Every entry captures the target environment, 
   API route `/api/run` configured as Node.js runtime (not Edge).
   Full deployment steps documented in `03-pocs/L5-deploy-to-vercel/deployment-notes.md`.
   Follow-up: run `vercel login` then `vercel deploy --prod --yes` from the source directory.
+
+## 2026-05-17T05:53:59Z — L-capstone: Deployment simulated (Vercel unauthenticated)
+
+- **Target**: Vercel (production), same project as L5
+- **Version**: git SHA e9f27f8 (capstone implementation)
+- **Outcome**: Simulated — Vercel CLI unauthenticated
+- **Details**: same as L5 — `vercel whoami` prompts for device code auth.
+  next build passes locally (same L5 stack + new tool blocks).
+  Deployment steps: run `vercel login` then `vercel --prod` from source/.
+- **Notes**: capstone adds no new server-side dependencies beyond L5.
+  The tool stubs (search.ts, fetch.ts) are pure TypeScript, no external deps.
+  Route handler imports the new ai_tool_call block at module load time.
+

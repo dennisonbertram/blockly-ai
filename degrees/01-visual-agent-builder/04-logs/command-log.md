@@ -169,3 +169,28 @@ npm view @ai-sdk/openai version    # → 3.0.64 (pin confirmed)
 - **Exit code**: -
 - **Observation**: "No existing credentials found. Starting login flow..." (device code: SRJL-MKDF)
 - **Notes**: Not authenticated. Deployment simulated. See deployment-notes.md.
+
+## 2026-05-17T05:52:39Z — L-capstone npm install
+- **Working directory**: `.../L-capstone-research-agent/source`
+- **Command**: `npm install`
+- **Exit code**: 0
+- **Observation**: Dependencies installed successfully. 3 vulnerabilities noted (same as L5).
+
+## 2026-05-17T05:52:39Z — L-capstone npm test (RED)
+- **Working directory**: `.../L-capstone-research-agent/source`
+- **Command**: `npm test`
+- **Exit code**: 1
+- **Observation**: 14 tests failing, 16 passing. Stubs throwing, empty workspace fixture. RED phase confirmed.
+
+## 2026-05-17T05:52:39Z — L-capstone vitest run -u (snapshot update)
+- **Working directory**: `.../L-capstone-research-agent/source`
+- **Command**: `npx vitest run -u`
+- **Exit code**: 0 (with snapshot updates)
+- **Observation**: 8 snapshots updated after run() signature change. 1 test still failing (mock order fix needed).
+
+## 2026-05-17T05:52:39Z — L-capstone npm test (GREEN)
+- **Working directory**: `.../L-capstone-research-agent/source`
+- **Command**: `npm test`
+- **Exit code**: 0
+- **Observation**: 43 tests passing, 7 test files. Full suite green.
+
