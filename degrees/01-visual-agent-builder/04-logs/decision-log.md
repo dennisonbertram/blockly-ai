@@ -134,6 +134,33 @@ Append-only record of design and tooling decisions. Every entry names the decisi
 - **Reversibility**: medium (requires adding mixin + serialization + UI, updating fixtures)
 - **Revisit when**: L5 or when users report needing more than 3 tools.
 
+## 2026-05-17T01:25:00Z — L5: Server-side Blockly headless execution strategy
+
+- **Decision**: Use `new Blockly.Workspace()` (not `Blockly.inject`) on the server. Register all blocks as side-effect imports at route-handler module load time.
+- **Alternatives considered**: (1) Generate code in the browser and POST the source string. (2) Write workspace JSON to disk and spawn a child process. (3) Use a headless DOM shim (jsdom/happy-dom) on the server to enable Blockly.inject.
+- **Rationale**: `Blockly.Workspace` (the serialization/codegen API) works in Node.js without any DOM. `Blockly.inject` (the visual renderer) requires DOM but is NOT used here. All L1–L4 tests used `new Blockly.Workspace()` directly — this is already proven. Approach (1) would leak the codegen to the client and make server-side execution insecure. Approach (2) would add complexity and temp-file I/O. Approach (3) is unnecessary.
+- **Trade-offs accepted**: All block registrations must happen before the workspace is created. The route handler must import all block modules at the top level to ensure this ordering. This is a one-time module-load cost, not per-request.
+- **Reversibility**: easy
+- **Revisit when**: If Blockly's import chain adds DOM references at module load time (not observed so far).
+
+## 2026-05-17T01:25:10Z — L5: Stream-back transport (custom ReadableStream over toUIMessageStreamResponse)
+
+- **Decision**: Return a custom `ReadableStream<Uint8Array>` response from `runEmitted`. Each `__sink(label, value)` call enqueues the value as UTF-8 bytes. Content-Type: text/plain; charset=utf-8.
+- **Alternatives considered**: (1) `result.toUIMessageStreamResponse()` — built-in helper from the AI SDK. (2) Server-Sent Events (SSE) framing with `data:` prefix. (3) JSON-lines (newline-delimited JSON).
+- **Rationale**: `toUIMessageStreamResponse()` requires calling `streamText()` at the route handler level and passing its return value directly to the helper. Our architecture executes arbitrary user-authored Blockly programs that may call `generateText`, `streamText`, or `Agent` (multi-step). The unified sink callback approach works for all three cases — the route handler doesn't need to know which AI function the emitted code calls. This matches L4's `buildRunnable` injection pattern exactly.
+- **Trade-offs accepted**: The response is NOT in the UIMessage stream protocol format (no `d:` framing). The browser client uses `response.body.getReader()` and collects raw text chunks, not parsed UIMessages. This is simpler for the POC but would need to be redesigned for a production `useChat` integration.
+- **Reversibility**: medium — would require changing the route handler and client to use the UIMessage protocol.
+- **Revisit when**: If `useChat` from `@ai-sdk/react` is integrated (L6+).
+
+## 2026-05-17T01:25:20Z — L5: Node.js runtime for /api/run (NOT Edge)
+
+- **Decision**: `/api/run` route exports `export const runtime = 'nodejs'`.
+- **Alternatives considered**: `export const runtime = 'edge'` (Vercel Edge Runtime).
+- **Rationale**: Edge runtime caps execution at 25 seconds (Vercel hobby plan). Multi-step agent loops in L4 can use up to `stepCountIs(5)` steps — each step is an LLM call (~5–10 seconds). 5 steps × 10s = 50s, exceeding the edge cap. Node.js runtime supports up to 60 seconds (hobby) or unlimited on Pro. This is documented as R10 in the task contract.
+- **Trade-offs accepted**: Cold starts are slower on Node.js than Edge (~200ms vs ~50ms). Bundle size is not constrained (Edge has 1MB limit). This is the right trade-off for an agent executor.
+- **Reversibility**: easy (one export change) but functionally incorrect for multi-step agents on Edge.
+- **Revisit when**: Never for this use case. If a "simple generateText only" variant is needed, a separate `/api/chat` Edge route could coexist.
+
 ## 2026-05-17T01:09:20Z — L4: textStream iteration via for await, NOT fullStream
 
 - **Decision**: `StreamSink` iterates `source.textStream` with `for await (const __chunk of ...)`.

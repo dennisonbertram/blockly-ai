@@ -113,3 +113,59 @@ npx vitest run --reporter=verbose  # GREEN: 11 passed
 npx vitest run --reporter=verbose  # REGRESSION: 28 passed
 npm view @ai-sdk/openai version    # → 3.0.64 (pin confirmed)
 ```
+
+## 2026-05-17T01:15:00Z — L5 npm install
+
+- **Working directory**: `.../L5-deploy-to-vercel/source`
+- **Command**: `npm install --legacy-peer-deps`
+- **Exit code**: 0
+- **Observation**: 250 packages installed. 3 vulnerabilities (1 moderate, 2 critical in next@15.3.2 — security patch pending).
+- **Notes**: Used npm instead of pnpm due to workspace isolation. --legacy-peer-deps needed for testing-library peer deps.
+
+## 2026-05-17T01:15:30Z — L5 vitest run (RED)
+
+- **Working directory**: `.../L5-deploy-to-vercel/source`
+- **Command**: `npx vitest run`
+- **Exit code**: 1
+- **Observation**: 5 tests failed (route-handler.test.ts ×4, e2e-handler.test.tsx ×1). All fail with "run-emitted not yet implemented".
+- **Notes**: RED state confirmed.
+
+## 2026-05-17T01:22:00Z — L5 vitest run (GREEN)
+
+- **Working directory**: `.../L5-deploy-to-vercel/source`
+- **Command**: `npx vitest run`
+- **Exit code**: 0
+- **Observation**: 26 tests passed across 4 test files.
+- **Notes**: GREEN state confirmed.
+
+## 2026-05-17T01:23:00Z — L5 npm run build (first attempt)
+
+- **Working directory**: `.../L5-deploy-to-vercel/source`
+- **Command**: `npm run build`
+- **Exit code**: 1
+- **Observation**: Error: `ssr: false` is not allowed with `next/dynamic` in Server Components. Required `'use client'` on page.tsx.
+- **Notes**: Next.js 15 App Router breaking change. Fixed by adding `'use client'` to app/page.tsx.
+
+## 2026-05-17T01:23:30Z — L5 npm run build (second attempt)
+
+- **Working directory**: `.../L5-deploy-to-vercel/source`
+- **Command**: `npm run build`
+- **Exit code**: 1
+- **Observation**: TypeScript error: unused `name` in tool.ts, unused `label` in run-emitted.ts.
+- **Notes**: noUnusedLocals: true stricter in tsc than in vitest/esbuild. Fixed.
+
+## 2026-05-17T01:23:50Z — L5 npm run build (final)
+
+- **Working directory**: `.../L5-deploy-to-vercel/source`
+- **Command**: `npm run build`
+- **Exit code**: 0
+- **Observation**: Build succeeded. Route table: / (1.36 kB), /_not-found (977 B), /api/run (140 B server).
+- **Notes**: Blockly NOT in server bundle (ssr:false working). Node.js runtime for /api/run.
+
+## 2026-05-17T01:24:00Z — L5 vercel whoami
+
+- **Working directory**: `.../L5-deploy-to-vercel/source`
+- **Command**: `npx vercel whoami`
+- **Exit code**: -
+- **Observation**: "No existing credentials found. Starting login flow..." (device code: SRJL-MKDF)
+- **Notes**: Not authenticated. Deployment simulated. See deployment-notes.md.

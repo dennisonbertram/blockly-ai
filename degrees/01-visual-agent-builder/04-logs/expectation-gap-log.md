@@ -86,3 +86,21 @@ Append-only record of moments where reality diverged from prior expectation. The
 
 - **Research showed**: `mockValues([step1, step2])` (array argument)
 - **Actual**: `mockValues(step1, step2)` (spread arguments)
+
+## 2026-05-17T01:25:00Z — L5: next/dynamic({ ssr: false }) requires 'use client' in Next.js 15 App Router
+
+- **Expected**: `next/dynamic({ ssr: false })` can be used in any page component (Server or Client Component), as documented in Next.js docs.
+- **Actual**: Next.js 15.3.2 App Router requires the importing file to have `'use client'` when using `ssr: false`. Using it in a Server Component produces: "Error: 'ssr: false' is not allowed with 'next/dynamic' in Server Components."
+- **Source of expectation**: General understanding of next/dynamic from Next.js documentation and L1 research.
+- **Source of reality**: `npm run build` output: build error in app/page.tsx.
+- **Impact**: Added `'use client'` to `app/page.tsx`. The page remains functionally a client entry point. The SSR exclusion still works correctly.
+- **Follow-up**: Update `01-research/blockly/integration-with-frameworks.md` to note that `'use client'` is required on the importing page in Next.js 15 App Router.
+
+## 2026-05-17T01:25:10Z — L5: TypeScript noUnusedLocals was stricter in Next.js build than in Vitest
+
+- **Expected**: The L4 blocks copied from L4 would pass TypeScript checks unchanged, since they passed vitest.
+- **Actual**: Next.js build runs `tsc` with `noUnusedLocals: true` (from tsconfig.json). Two files had unused locals that vitest didn't catch because vitest uses esbuild (no type checking): tool.ts (`const name`) and run-emitted.ts (`label` parameter).
+- **Source of expectation**: L4 source passed its own vitest run without TypeScript errors.
+- **Source of reality**: `npm run build` TypeScript errors in tool.ts and run-emitted.ts.
+- **Impact**: Fixed by removing unused locals. Minor code cleanup.
+- **Follow-up**: Consider adding `tsc --noEmit` as a pre-test step in future POCs to catch TS errors before the build.
