@@ -5,7 +5,7 @@
 ```
 ai@6.0.184          (dist-tag: latest)
 @ai-sdk/anthropic@3.0.78
-@ai-sdk/openai@3.0.75
+@ai-sdk/openai@3.0.64
 @ai-sdk/google@2.x  (verify with npm view @ai-sdk/google version)
 ```
 
@@ -121,3 +121,5 @@ The v6 SDK requires `zod@^3.25.76 || ^4.1.8`. Both Zod v3 and Zod v4 are support
 - `Sandbox` abstractions for tool execution
 
 **Evidence:** CHANGELOG.md v7.0.0-beta entries: "rename `stepCountIs` to `isStepCount`", "add `instructions` as the primary prompt option and deprecate `system`", "All packages are now ESM-only".
+
+> **Correction (Phase 11 audit, 2026-05-17)**: An earlier version of this document cited `@ai-sdk/openai@3.0.75` — that version does not exist on npm. The actual current 3.0.x pin used throughout the degree is `3.0.64`. See `05-distillation/gotchas/ai-sdk-openai-version-3075-does-not-exist.md` for the full provenance.

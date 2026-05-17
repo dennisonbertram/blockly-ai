@@ -20,7 +20,7 @@ Phase 1 research for combining Google Blockly with the Vercel AI SDK + LLMs.
 | `blockly` | `12.5.1` | npm view, 2026-05-16 |
 | `ai` | `6.0.184` | npm view, 2026-05-16 |
 | `@ai-sdk/anthropic` | `3.0.78` | npm view, 2026-05-16 |
-| `@ai-sdk/openai` | `3.0.75` | npm view, 2026-05-16 |
+| `@ai-sdk/openai` | `3.0.64` | npm view, 2026-05-16 |
 | `zod` | `^3.25.76 || ^4.1.8` | AI SDK peer dep range |
 | `next` | `15.x` | confirmed compatible with AI SDK route handlers |
 | Node | `≥20` | AI SDK + Blockly minimums |

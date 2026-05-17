@@ -3,7 +3,7 @@
 **Pinned versions (as of 2026-05-16):**
 - `ai`: 6.0.184 (stable/latest)
 - `@ai-sdk/anthropic`: 3.0.78
-- `@ai-sdk/openai`: 3.0.75 (note: package version ≠ API spec version)
+- `@ai-sdk/openai`: 3.0.64 (note: package version ≠ API spec version)
 - `@ai-sdk/google`: 2.x (see capability-map)
 - Node.js: >= 18 required
 - Zod peer dep: `^3.25.76 || ^4.1.8`
