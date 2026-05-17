@@ -2,7 +2,23 @@
  * execute.test.ts
  *
  * Integration tests: compile emitted module, execute with MockLanguageModelV3.
- * Uses temp-file + dynamic import strategy (see implementation-notes.md).
+ *
+ * ## Execution strategy: AsyncFunction with injected modules
+ *
+ * The emitted source uses ES module syntax (import/export), which cannot be
+ * executed inside `new Function(...)`. The temp-file + dynamic import approach
+ * fails in Vitest because Vite's module graph does not resolve files outside
+ * the project root.
+ *
+ * Instead, we use an "injected mode" execution helper:
+ * 1. Strip the import statements from the emitted source.
+ * 2. Strip the `export default` declaration, keeping the body as a plain
+ *    async function.
+ * 3. Execute via `new AsyncFunction` with the AI SDK modules injected as
+ *    parameters (generateText, anthropic, openai).
+ *
+ * This is equivalent in behavior to the module-mode output — the same code
+ * runs, just without ES module syntax. Documented in implementation-notes.md.
  *
  * BT-005: Execute emitted module with MockLanguageModelV3 → sink receives { label, value }
  * BT-006: Execute with system prompt → mock model's doGenerate called with both system+prompt
@@ -12,12 +28,12 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import * as Blockly from 'blockly/core'
 import * as libraryBlocks from 'blockly/blocks'
-import { tmpdir } from 'node:os'
-import { writeFileSync, unlinkSync, existsSync } from 'node:fs'
-import { join } from 'node:path'
 
 // BT-007: Smoke test — MockLanguageModelV3 import resolves
 import { MockLanguageModelV3 } from 'ai/test'
+import { generateText } from 'ai'
+import { anthropic } from '@ai-sdk/anthropic'
+import { openai } from '@ai-sdk/openai'
 
 import { generate } from '../src/codegen/generate'
 
@@ -40,23 +56,64 @@ it('MockLanguageModelV3 import resolves from ai/test', () => {
 })
 
 /**
- * Helper: write emitted source to a temp .mjs file and dynamically import it.
- * Returns the default export (the run() function).
- * Cleans up the temp file after the test.
+ * Strip ES module syntax from emitted source and return a callable async function.
+ *
+ * The emitted source looks like:
+ *   import { generateText } from 'ai';
+ *   import { anthropic } from '@ai-sdk/anthropic';
+ *
+ *   export default async function run({ model: __model_provider, sink: __sink } = {}) {
+ *     <body>
+ *   }
+ *
+ * We:
+ * 1. Remove import lines.
+ * 2. Remove `export default async function run(params) {` → replace with `async function run(params) {`
+ * 3. Wrap in an AsyncFunction that receives injected modules and returns run.
  */
-async function loadEmittedModule(source: string): Promise<{
-  run: (opts?: { model?: unknown; sink?: (label: string, value: unknown) => void }) => Promise<void>
-  tempPath: string
-}> {
-  const tempPath = join(tmpdir(), `blockly-l2-test-${Date.now()}-${Math.random().toString(36).slice(2)}.mjs`)
-  writeFileSync(tempPath, source, 'utf-8')
-  const mod = await import(`file://${tempPath}`)
-  return { run: mod.default, tempPath }
+function buildRunnable(source: string): (
+  opts?: { model?: unknown; sink?: (label: string, value: unknown) => void }
+) => Promise<void> {
+  // Remove import statement lines
+  const noImports = source
+    .split('\n')
+    .filter((line) => !line.trimStart().startsWith('import '))
+    .join('\n')
+
+  // Remove `export default` keyword, keep `async function run`
+  const noExport = noImports.replace('export default async function run', 'async function run')
+
+  // Wrap: inject modules + return the run function
+  const wrappedBody = `
+${noExport}
+return run;
+`
+
+  // Build AsyncFunction with injected module params
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor as new (
+    ...args: string[]
+  ) => (...args: unknown[]) => Promise<unknown>
+
+  const factory = new AsyncFunction('generateText', 'anthropic', 'openai', wrappedBody)
+
+  // Execute factory to get the run function (factory itself is async because we use AsyncFunction)
+  // But factory.call returns the result synchronously (the factory body does not await)
+  // Actually new AsyncFunction creates a function that runs asynchronously.
+  // We need a sync way to create the runner.
+  // Use regular Function instead since the body itself is not awaited at definition time:
+  const SyncFunction = Function
+  const syncFactory = new SyncFunction('generateText', 'anthropic', 'openai', wrappedBody) as (
+    gt: typeof generateText,
+    anth: typeof anthropic,
+    oai: typeof openai
+  ) => (opts?: { model?: unknown; sink?: (label: string, value: unknown) => void }) => Promise<void>
+
+  return syncFactory(generateText, anthropic, openai)
 }
 
 describe('execute emitted module', () => {
   let workspace: Blockly.Workspace
-  const tempFiles: string[] = []
 
   beforeEach(() => {
     workspace = new Blockly.Workspace()
@@ -64,13 +121,6 @@ describe('execute emitted module', () => {
 
   afterEach(() => {
     workspace.dispose()
-    // Clean up temp files
-    for (const f of tempFiles) {
-      if (existsSync(f)) {
-        try { unlinkSync(f) } catch { /* ignore */ }
-      }
-    }
-    tempFiles.length = 0
   })
 
   // BT-005
@@ -94,9 +144,7 @@ describe('execute emitted module', () => {
       results.push({ label, value })
     }
 
-    const { run, tempPath } = await loadEmittedModule(source)
-    tempFiles.push(tempPath)
-
+    const run = buildRunnable(source)
     await run({ model: mockModel, sink })
 
     expect(results).toHaveLength(1)
@@ -120,9 +168,7 @@ describe('execute emitted module', () => {
     })
 
     const results: Array<{ label: string; value: unknown }> = []
-    const { run, tempPath } = await loadEmittedModule(source)
-    tempFiles.push(tempPath)
-
+    const run = buildRunnable(source)
     await run({ model: mockModel, sink: (label, value) => results.push({ label, value }) })
 
     // The mock model should have been called

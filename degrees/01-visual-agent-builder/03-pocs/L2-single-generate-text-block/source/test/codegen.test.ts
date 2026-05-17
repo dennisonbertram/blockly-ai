@@ -83,8 +83,9 @@ describe('generate(workspace) — async codegen', () => {
     expect(code).toContain("prompt: 'Hello'")
     // Must access .text on the result
     expect(code).toContain('.text')
-    // Must call __sink
-    expect(code).toContain("__sink('output'")
+    // Must call __sink (with optional chaining to guard against no-sink case)
+    expect(code).toContain("__sink")
+    expect(code).toContain("'output'")
   })
 
   // BT-003
