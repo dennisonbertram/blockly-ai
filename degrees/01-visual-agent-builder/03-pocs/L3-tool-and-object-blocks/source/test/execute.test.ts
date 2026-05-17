@@ -103,11 +103,15 @@ describe('execute emitted L3 modules', () => {
     const source = generate(workspace)
 
     // Mock model returns valid JSON matching the schema { title, summary, tags }
+    // LanguageModelV3 format: finishReason is { unified: 'stop' }, usage is nested
     const mockModel = new MockLanguageModelV3({
       doGenerate: async () => ({
         content: [{ type: 'text', text: '{"title":"AI Overview","summary":"AI is transformative","tags":["ml","ai"]}' }],
-        finishReason: 'stop' as const,
-        usage: { inputTokens: 20, outputTokens: 20, totalTokens: 40 },
+        finishReason: { unified: 'stop' as const },
+        usage: {
+          inputTokens: { total: 20, noCache: undefined, cacheRead: undefined, cacheWrite: undefined },
+          outputTokens: { total: 20, text: undefined, reasoning: undefined },
+        },
       }),
     })
 
@@ -138,8 +142,14 @@ describe('execute emitted L3 modules', () => {
 
     // Step 1: model calls the 'weather' tool
     // Step 2: model responds with text after seeing tool result
+    // LanguageModelV3 format: finishReason is { unified: 'stop' | 'tool-calls' }, usage is nested
+    const v3Usage = (input: number, output: number) => ({
+      inputTokens: { total: input, noCache: undefined, cacheRead: undefined, cacheWrite: undefined },
+      outputTokens: { total: output, text: undefined, reasoning: undefined },
+    })
     const mockModel = new MockLanguageModelV3({
-      doGenerate: mockValues([
+      // mockValues takes spread args (not an array): mockValues(step1, step2)
+      doGenerate: mockValues(
         {
           content: [{
             type: 'tool-call' as const,
@@ -147,15 +157,15 @@ describe('execute emitted L3 modules', () => {
             toolCallId: 'tc_1',
             input: { city: 'Paris' },
           }],
-          finishReason: 'tool-calls' as const,
-          usage: { inputTokens: 20, outputTokens: 10, totalTokens: 30 },
+          finishReason: { unified: 'tool-calls' as const },
+          usage: v3Usage(20, 10),
         },
         {
           content: [{ type: 'text' as const, text: 'The weather in Paris is sunny and 70°F.' }],
-          finishReason: 'stop' as const,
-          usage: { inputTokens: 50, outputTokens: 20, totalTokens: 70 },
+          finishReason: { unified: 'stop' as const },
+          usage: v3Usage(50, 20),
         },
-      ]),
+      ),
     })
 
     const results: Array<{ label: string; value: unknown }> = []

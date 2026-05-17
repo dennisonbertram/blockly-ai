@@ -1,38 +1,56 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`generate(workspace) — L3 block codegen > BT-001: tool-only fixture snapshot 1`] = `
-"import { generateText } from 'ai';
+"import { generateText, tool } from 'ai';
+import { z } from 'zod';
 
 export default async function run({ model: __model_provider, sink: __sink } = {}) {
-  __sink?.('tool_def', ({}));
+  __sink?.('tool_def', tool({
+    description: 'Get weather for a city',
+    inputSchema: z.object({ city: z.string() }),
+    execute: async (input) => {
+        return '{ temp: 70, conditions: \\'sunny\\' }';
+    }
+  }));
 }
 "
 `;
 
 exports[`generate(workspace) — L3 block codegen > BT-002: generate-text-with-tool fixture snapshot 1`] = `
-"import { generateText, stepCountIs } from 'ai';
+"import { generateText, tool, stepCountIs } from 'ai';
+import { z } from 'zod';
 import { anthropic } from '@ai-sdk/anthropic';
 
 export default async function run({ model: __model_provider, sink: __sink } = {}) {
-  __sink?.('output', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'What is the weather?', tools: ({}), toolChoice: 'auto', stopWhen: stepCountIs(5) })).text);
+  __sink?.('output', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'What is the weather?', tools: { weather: tool({
+    description: 'Get weather for a city',
+    inputSchema: z.object({ city: z.string() }),
+    execute: async (input) => {
+        return '{ temp: 70, conditions: \\'sunny\\' }';
+    }
+  }) }, toolChoice: 'auto', stopWhen: stepCountIs(5) })).text);
 }
 "
 `;
 
 exports[`generate(workspace) — L3 block codegen > BT-003: generate-object fixture snapshot 1`] = `
-"import { generateText } from 'ai';
+"import { generateText, Output } from 'ai';
+import { z } from 'zod';
+import { anthropic } from '@ai-sdk/anthropic';
 
 export default async function run({ model: __model_provider, sink: __sink } = {}) {
-  __sink?.('structured', (undefined));
+  __sink?.('structured', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'summarize X', output: Output.object({ schema: z.object({ title: z.string(), summary: z.string(), tags: z.array(z.string()) }) }) })).output);
 }
 "
 `;
 
 exports[`generate(workspace) — L3 block codegen > BT-004: generate-object-optional-field fixture snapshot 1`] = `
-"import { generateText } from 'ai';
+"import { generateText, Output } from 'ai';
+import { z } from 'zod';
+import { anthropic } from '@ai-sdk/anthropic';
 
 export default async function run({ model: __model_provider, sink: __sink } = {}) {
-  __sink?.('structured', (undefined));
+  __sink?.('structured', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Generate a person', output: Output.object({ schema: z.object({ name: z.string(), middleName: z.string().nullable() }) }) })).output);
 }
 "
 `;

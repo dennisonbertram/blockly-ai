@@ -118,8 +118,8 @@ describe('generate(workspace) — L3 block codegen', () => {
 
     const code = generate(workspace)
 
-    // Must import Output from 'ai'
-    expect(code).toContain("import { Output")
+    // Must import Output from 'ai' — appears in the import statement (combined: "import { generateText, Output } from 'ai'")
+    expect(code).toMatch(/import \{[^}]*Output[^}]*\} from 'ai'/)
     expect(code).toContain("from 'ai'")
     // Must import z from 'zod'
     expect(code).toContain("import { z } from 'zod'")
@@ -130,8 +130,8 @@ describe('generate(workspace) — L3 block codegen', () => {
     expect(code).toContain('title: z.string()')
     expect(code).toContain('summary: z.string()')
     expect(code).toContain('tags: z.array(z.string())')
-    // Must access .object on result
-    expect(code).toContain('.object')
+    // Must access .output on result (v6 SDK uses .output not .object — see surprises.md)
+    expect(code).toContain('.output')
     // Must call generateText
     expect(code).toContain('generateText(')
   })
