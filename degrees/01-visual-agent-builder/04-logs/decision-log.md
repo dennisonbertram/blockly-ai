@@ -79,3 +79,39 @@ Append-only record of design and tooling decisions. Every entry names the decisi
 - **Trade-offs accepted**: The mock doesn't test actual Blockly rendering. The Strict Mode guard logic is tested via a pure unit test simulation and via the `mockInject` call count assertions.
 - **Reversibility**: easy (remove mock when Playwright tests are added at L5)
 - **Revisit when**: L5 adds Playwright — real E2E tests will cover actual inject behavior.
+
+## 2026-05-17T00:45:00Z — L3: Multi-line tool body uses ToolReturn block instead of return field
+
+- **Decision**: Companion `ai_tool_return` statement block compiles to `return <value>;` inside the tool's `execute` body.
+- **Alternatives considered**: (1) A "return value" value input directly on the `ai_tool` block's face. (2) A text field for a raw expression string.
+- **Rationale**: Blockly fields are single-line strings — they can't hold composed block expressions (e.g., a ZodObject block or a function call block). A statement block follows Blockly's natural composition model: any expression block can be dragged into the `VALUE` input of `ai_tool_return`. This is the same pattern Blockly's built-in `procedures_return` block uses. It also allows multi-statement execute bodies with logic before the final return.
+- **Trade-offs accepted**: Users must explicitly place a ToolReturn block at the end of the body. Forgetting it means the execute function returns `undefined` implicitly. Documentation in tooltip mitigates this.
+- **Reversibility**: easy (if a simpler single-value UI is preferred later, add a shadow/default ToolReturn)
+- **Revisit when**: L4+ when tool bodies may have conditional return paths.
+
+## 2026-05-17T00:45:10Z — L3: .nullable() over .optional() for ZodField optional toggle
+
+- **Decision**: When the ZodField `OPTIONAL` checkbox is checked, emit `.nullable()` (not `.optional()`).
+- **Alternatives considered**: `.optional()` (Zod standard). A dropdown with both choices.
+- **Rationale**: OpenAI's strict structured output mode fails schema validation when fields use `.optional()`. The research document `generate-object.md` explicitly states: "Use `.nullable()` not `.optional()` for OpenAI strict mode." Since the primary use case for GenerateObject is OpenAI/Anthropic structured output, `.nullable()` is the safer default. The field label says "nullable:" to be transparent.
+- **Trade-offs accepted**: Semantically `.nullable()` means the value can be `null` (not `undefined`). Code consuming the generated object must handle `null` values, not missing keys. This is a different contract than `.optional()`. Advanced users who need `.optional()` cannot do so via the visual block (they would need to write code manually).
+- **Reversibility**: easy (add dropdown in L4+)
+- **Revisit when**: When Anthropic or other providers relax strict mode requirements, or when user research shows `.optional()` is more intuitive.
+
+## 2026-05-17T00:45:20Z — L3: Testing tool execution without a real model
+
+- **Decision**: Use `MockLanguageModelV3` with `mockValues(step1, step2)` — step 1 returns a tool-call, step 2 returns the final text — to prove end-to-end tool execution wiring.
+- **Alternatives considered**: (1) Use a real model (Anthropic/OpenAI) for one test. (2) Test only that the tools map is passed to generateText (inspect doGenerateCalls), not that execute runs. (3) Use a single-step mock that only returns a tool-call (leaving no final text step).
+- **Rationale**: No real LLM calls in CI (cost, flakiness). Option 2 doesn't prove the tool's `execute` function actually runs — it only proves the tools map is wired. The two-step mock (tool-call → text) proves the full loop: (a) mock receives tool call, (b) tool.execute runs in the SDK's step loop, (c) mock responds with text after seeing tool result, (d) sink receives final text.
+- **Trade-offs accepted**: The `stopWhen: stepCountIs(5)` in the emitted code must be honored. The mock's second response stops the loop naturally with `finishReason: { unified: 'stop' }`. If the emitted code omitted `stopWhen`, the loop would continue indefinitely (third call would replay the last mock value forever).
+- **Reversibility**: easy
+- **Revisit when**: L4 adds `ToolLoopAgent` which may change how tool loops are bounded.
+
+## 2026-05-17T00:45:30Z — L3: toolChoice defaults to 'auto' when tools wired
+
+- **Decision**: When a `UseTools` block is connected to `GenerateText`, emit `toolChoice: 'auto'` in the `generateText` call.
+- **Alternatives considered**: (1) No toolChoice (SDK default). (2) A dropdown on the `GenerateText` block for all toolChoice options. (3) A separate `ToolChoiceBlock`.
+- **Rationale**: `toolChoice: 'auto'` is the SDK default and the most useful setting for typical agentic flows. Emitting it explicitly makes the generated code self-documenting. A dropdown on the block would add UI complexity for a feature that rarely needs overriding. A separate block adds visual overhead.
+- **Trade-offs accepted**: Users who want `toolChoice: 'required'` or a specific tool cannot do so via the block UI (L4+ work).
+- **Reversibility**: easy (add dropdown in L4+)
+- **Revisit when**: L4 if agents need fine-grained tool routing.

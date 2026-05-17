@@ -61,3 +61,28 @@ Append-only record of moments where reality diverged from prior expectation. The
 - **Source of reality**: Vitest 3.2.4 deprecation warning in test output.
 - **Impact**: Minor — updated vitest.config.ts to use `deps.optimizer.web.include`.
 - **Follow-up**: Update `test-strategy.md` to use the current Vitest 3.x config syntax.
+
+## L3 — tool-and-object-blocks (2026-05-17)
+
+### G1: GenerateTextResult.object (expected) vs .output (actual)
+
+- **Expected** (from task spec): `(await generateText({...})).object`
+- **Actual**: The v6 result has `.output` (and `.experimental_output`). No `.object` property.
+- **Impact**: Emitted code used `.output` instead of `.object`. Tests updated.
+
+### G2: LanguageModelV3 finishReason shape mismatch
+
+- **Research/testing-model.md said**: `finishReason: 'stop'` (string)
+- **Actual LanguageModelV3 spec**: `finishReason: { unified: 'stop', raw?: string }` (object)
+- **Impact**: Flat string works for plain text generation (finishReason is stored but rarely checked in the simple path). Fails silently for Output.object and tool-calling loops.
+
+### G3: LanguageModelV3 usage shape mismatch
+
+- **Research said**: `usage: { inputTokens: 10, outputTokens: 5, totalTokens: 15 }` (flat)
+- **Actual**: `usage: { inputTokens: { total: 10, ... }, outputTokens: { total: 5, ... } }` (nested)
+- **Impact**: Flat format doesn't crash for simple text (undefined arithmetic), but silently breaks usage tracking.
+
+### G4: mockValues() call signature
+
+- **Research showed**: `mockValues([step1, step2])` (array argument)
+- **Actual**: `mockValues(step1, step2)` (spread arguments)

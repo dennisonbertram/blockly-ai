@@ -79,3 +79,35 @@ Append-only record of errors encountered during this degree. Every entry capture
 - **Root cause**: `Blockly.Blocks` is a runtime-mutated property, not a static named export. `{ ...actual }` spread doesn't capture it.
 - **Fix**: Explicitly added `Blocks: actual.Blocks` to the mock return object.
 - **Related decision / gotcha**: ESM module namespace objects are not plain JS objects. Runtime mutations aren't part of the static export list.
+
+## L3 — tool-and-object-blocks (2026-05-17)
+
+### E1: GenerateTextResult.object does not exist (NoOutputGeneratedError)
+
+- **Symptom**: BT-005 failed with `NoOutputGeneratedError` when accessing `result.output`. Research/spec said `.object`.
+- **Root cause**: Task spec said emit `(await generateText({...})).object`. Actual v6 SDK has `.output` (not `.object`).
+- **Fix**: Updated `generate-object.ts` to emit `.output`. Noted in surprises.md.
+
+### E2: MockLanguageModelV3 finishReason undefined (no output generated)
+
+- **Symptom**: `lastStep.finishReason` was `undefined` in structured output test. `Output.object` parsing was silently skipped.
+- **Root cause**: `LanguageModelV3` requires `finishReason: { unified: 'stop' }` (object). Research showed flat string `'stop'`. Reading `'stop'.unified` returns `undefined` silently.
+- **Fix**: Updated mock to use `{ unified: 'stop' }`.
+
+### E3: MockLanguageModelV3 usage TypeError in tool-call test
+
+- **Symptom**: `Cannot read properties of undefined (reading 'inputTokens')` from `asLanguageModelUsage`.
+- **Root cause**: Research showed flat `usage: { inputTokens: 10, ... }`. V3 spec requires nested `inputTokens: { total: 10, ... }`. Reading `(10).total` returns `undefined`, then `undefined.total` throws.
+- **Fix**: Updated mock to use nested V3 usage structure.
+
+### E4: mockValues([array]) vs mockValues(spread) API mismatch
+
+- **Symptom**: `doGenerate: mockValues([step1, step2])` — first call returned the array itself, not step1.
+- **Root cause**: Research doc showed `mockValues([...])` but actual signature is `mockValues<T>(...values: T[])`.
+- **Fix**: Changed to `mockValues(step1, step2)` (spread form).
+
+### E5: new Function('a', 'b', ..., body) fails in happy-dom
+
+- **Symptom**: `SyntaxError: Unexpected token ','` when calling `new Function` with multiple string params.
+- **Root cause**: happy-dom's Function constructor doesn't handle the multi-param string form.
+- **Fix**: Changed to two-argument form: `new Function('a, b, c', body)` with comma-separated names as one string.

@@ -45,3 +45,39 @@ Append-only record of investigations — bugs, mysterious behavior, performance 
 - **Evidence gathered**: Running `Object.keys(actual)` in mock factory showed `Blocks` was not in the spread keys.
 - **Resolution**: Added `Blocks: actual.Blocks` explicitly to mock return object.
 - **Distillation candidate?**: Yes — anti-pattern: don't rely on `{ ...actual }` to capture runtime-mutated module properties in vi.mock.
+
+## L3 — tool-and-object-blocks (2026-05-17)
+
+### D1: Probed Output export path
+
+```sh
+node -e "const ai=require('./node_modules/ai/dist/index.js'); console.log(Object.keys(ai).filter(k=>k.toLowerCase().includes('output')))"
+# → [ 'NoOutputGeneratedError', 'Output' ]
+```
+
+### D2: Probed LanguageModelV3GenerateResult shape via MockLanguageModelV3
+
+```sh
+# Verified finishReason must be { unified: 'stop' } by checking generate-text.ts:1212
+# if (lastStep.finishReason === 'stop') { ... }  ← this is the v6 consumer side
+# and generate-text.ts:814:
+# result.finishReason.unified  ← this is the V3 spec access pattern
+```
+
+### D3: Traced NoOutputGeneratedError to lastStep.finishReason === undefined
+
+```
+lastStep.text: {"title":"AI Overview"}   ← text is correct
+lastStep.finishReason: undefined          ← because 'stop'.unified === undefined
+```
+The output parse is skipped because `undefined !== 'stop'`.
+
+### D4: Probed mockValues() source
+
+```sh
+cat node_modules/ai/src/test/mock-values.ts
+# export function mockValues<T>(...values: T[]): () => T {
+#   let counter = 0;
+#   return () => values[counter++] ?? values[values.length - 1];
+# }
+```

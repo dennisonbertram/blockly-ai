@@ -101,3 +101,15 @@ Append-only record of every meaningful command run during this degree. "Meaningf
 - **Command**: `pnpm test`
 - **Exit code**: 0
 - **Observation**: 5 test files, 30 tests, 4 snapshots written, all passing.
+
+## L3 — tool-and-object-blocks (2026-05-17)
+
+```
+cd degrees/01-visual-agent-builder/03-pocs/L3-tool-and-object-blocks/source
+npm install
+npx vitest run --reporter=verbose  # RED: 6 failed, 5 passed
+# [implement blocks]
+npx vitest run --reporter=verbose  # GREEN: 11 passed
+npx vitest run --reporter=verbose  # REGRESSION: 28 passed
+npm view @ai-sdk/openai version    # → 3.0.64 (pin confirmed)
+```
