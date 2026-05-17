@@ -1,0 +1,101 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "ai_output_sink",
+        "id": "sink-1",
+        "x": 50,
+        "y": 50,
+        "fields": {
+          "LABEL": "output"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "ai_generate_text",
+              "id": "gen-1",
+              "inputs": {
+                "MODEL": {
+                  "block": {
+                    "type": "ai_model",
+                    "id": "model-1",
+                    "fields": {
+                      "PROVIDER": "anthropic",
+                      "NAME": "claude-haiku-4-5"
+                    }
+                  }
+                },
+                "PROMPT": {
+                  "block": {
+                    "type": "ai_prompt",
+                    "id": "prompt-1",
+                    "fields": {
+                      "TEXT": "What is the weather?"
+                    }
+                  }
+                },
+                "TOOLS": {
+                  "block": {
+                    "type": "ai_use_tools",
+                    "id": "tools-1",
+                    "inputs": {
+                      "TOOL_0": {
+                        "block": {
+                          "type": "ai_tool",
+                          "id": "tool-1",
+                          "fields": {
+                            "NAME": "weather",
+                            "DESCRIPTION": "Get weather for a city"
+                          },
+                          "inputs": {
+                            "INPUT_SCHEMA": {
+                              "block": {
+                                "type": "ai_zod_object",
+                                "id": "schema-1",
+                                "inputs": {
+                                  "FIELDS": {
+                                    "block": {
+                                      "type": "ai_zod_field",
+                                      "id": "field-1",
+                                      "fields": {
+                                        "NAME": "city",
+                                        "TYPE": "string",
+                                        "OPTIONAL": false
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "BODY": {
+                              "block": {
+                                "type": "ai_tool_return",
+                                "id": "return-1",
+                                "inputs": {
+                                  "VALUE": {
+                                    "block": {
+                                      "type": "ai_prompt",
+                                      "id": "retval-1",
+                                      "fields": {
+                                        "TEXT": "{ temp: 70, conditions: 'sunny' }"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
