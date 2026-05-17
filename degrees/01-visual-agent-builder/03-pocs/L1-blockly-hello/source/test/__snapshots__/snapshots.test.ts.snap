@@ -1,0 +1,18 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Code generation regression snapshots > SNAPSHOT: (1 + 2) * 3 with grouping parens 1`] = `
+"(1 + 2) * 3;
+"
+`;
+
+exports[`Code generation regression snapshots > SNAPSHOT: 1 + 2 * 3 with correct precedence 1`] = `
+"1 + 2 * 3;
+"
+`;
+
+exports[`Code generation regression snapshots > SNAPSHOT: Greet('Alice') block produces console.log line 1`] = `
+"console.log('Hello, ' + 'Alice');
+"
+`;
+
+exports[`Code generation regression snapshots > SNAPSHOT: empty workspace returns empty string 1`] = `""`;
