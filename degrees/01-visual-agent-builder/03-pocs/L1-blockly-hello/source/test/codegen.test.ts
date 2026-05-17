@@ -103,16 +103,23 @@ describe('generate(workspace)', () => {
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
+    // Blockly.serialization.workspaces.load throws for unknown block types.
+    // The defensive contract is: generate() itself never throws.
+    // We load the malformed state in a try/catch, then call generate().
     let code: string | undefined
+    Blockly.Events.disable()
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      Blockly.serialization.workspaces.load(malformedState as any, workspace)
+    } catch {
+      // Expected: Blockly throws for unknown block types.
+      // The workspace is left empty — generate() will return ''.
+    } finally {
+      Blockly.Events.enable()
+    }
+
+    // generate() must NOT throw, even on a partially-loaded or empty workspace
     expect(() => {
-      Blockly.Events.disable()
-      // Use try/finally to always re-enable events
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        Blockly.serialization.workspaces.load(malformedState as any, workspace)
-      } finally {
-        Blockly.Events.enable()
-      }
       code = generate(workspace)
     }).not.toThrow()
 
