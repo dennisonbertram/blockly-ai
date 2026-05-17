@@ -1,46 +1,49 @@
-# Environment — Visual Agent Builder
+# Environment
 
-> All versions below are **tentative** and will be confirmed during the research phase. Final pinned versions land in each POC's `package.json` and are recorded in `04-logs/command-log.md`.
+Confirmed at Phase 1 research (2026-05-16).
 
 ## Runtime
 
-- **Node.js** ≥ 20 (LTS).
-- **Browser**: modern evergreen (Chromium-based + Firefox + Safari latest two majors). Blockly requires a DOM.
+| Component | Version | Notes |
+|---|---|---|
+| Node | ≥ 20 | AI SDK v6 + Next.js 15 minimums |
+| pnpm | latest stable | preferred package manager |
+| TypeScript | 5.x | strict mode |
+| Next.js | 15.x | App Router; route handlers used for server execution |
 
-## Package Manager
+## Libraries (pinned)
 
-- **pnpm** (preferred). `npm` acceptable for ad-hoc tooling.
+| Package | Version | Source |
+|---|---|---|
+| `blockly` | `12.5.1` | Phase 1 research, npm view 2026-05-16 |
+| `ai` | `6.0.184` | Phase 1 research, npm view 2026-05-16 |
+| `@ai-sdk/anthropic` | `3.0.78` | Phase 1 research |
+| `@ai-sdk/openai` | `3.0.75` | Phase 1 research |
+| `zod` | `^3.25.76 || ^4.1.8` | AI SDK peer dep range |
 
-## Language
+## API keys (server-only)
 
-- **TypeScript** 5.x, strict mode.
+- `ANTHROPIC_API_KEY` — Anthropic provider
+- `OPENAI_API_KEY` — OpenAI provider
 
-## Host Framework
+Stored in `.env.local` (gitignored). For production: Vercel project env vars.
 
-- **Next.js** 15.x (App Router). Verify exact minor in research; confirm streaming behavior for AI SDK responses.
+## Deployment
 
-## Visual Editor
+- Local dev: `pnpm dev` (Next.js)
+- Production: Vercel (`vercel deploy`)
+- Runtime: Node (default). Edge runtime tested but bounded by 25 s execution limit.
 
-- **Blockly** — latest stable from `blockly` on npm. Pin during L1 setup.
+## Test environment
 
-## AI Runtime
+- Jest or Vitest (decided in Phase 2)
+- jsdom or happy-dom for Blockly workspace tests
+- `MockLanguageModelV3` from `ai/test` for AI SDK tests
 
-- **`ai`** (Vercel AI SDK) v5.x — confirm exact version in research.
-- **`@ai-sdk/anthropic`** — provider adapter for Claude models.
-- **`@ai-sdk/openai`** — provider adapter for GPT models.
+## Confirmed (since Phase 0 stub)
 
-## Validation
-
-- **Zod** 3.x. Schemas used for tool params and `generateObject` output.
-
-## Tooling
-
-- **Vercel CLI** for deploys in L5 and the capstone.
-- **gh** (GitHub CLI) for repo and PR operations.
-- **git** for source control.
-
-## Provider Keys
-
-- `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` in `.env.local` (gitignored). Never exposed to the browser. Server-side execution is the default for any code that touches a real provider.
-
-> **To be confirmed during research**: exact AI SDK minor version, Next.js minor version, Blockly major version, whether `@ai-sdk/anthropic` v1.x or v2.x is current.
+- Node ≥ 20 (was: ≥ 20) — kept.
+- Blockly latest (was: latest) — pinned to **12.5.1** (v13 in beta with breaking changes, deferred).
+- `ai` SDK v5.x (was: v5.x) — **corrected to v6.0.184** (latest stable; v5 was a major rename release; v6 continues that direction).
+- Provider packages were major-version bumped to match `ai` v6 (`@ai-sdk/anthropic@3.x`, `@ai-sdk/openai@3.x`).
+- Zod 3.x (was: 3.x) — **AI SDK accepts both 3.x AND 4.x as peer dep**; we will use 3.x for stability unless a Zod 4 feature is needed.
