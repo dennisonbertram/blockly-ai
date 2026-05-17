@@ -80,4 +80,4 @@ export const toolbox = {
       ],
     },
   ],
-} as const
+}

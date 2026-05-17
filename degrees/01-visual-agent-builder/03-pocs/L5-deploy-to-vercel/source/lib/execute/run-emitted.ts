@@ -203,7 +203,7 @@ export async function runEmitted(opts: RunEmittedOptions): Promise<Response> {
     },
   })
 
-  const sink = (label: string, value: unknown) => {
+  const sink = (_label: string, value: unknown) => {
     if (!controller) return
     const text = typeof value === 'string' ? value : JSON.stringify(value)
     controller.enqueue(encoder.encode(text))

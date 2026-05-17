@@ -63,7 +63,9 @@ javascriptGenerator.forBlock['ai_tool'] = function (
   block: Block,
   generator: JavascriptGenerator
 ): [string, number] {
-  const name = block.getFieldValue('NAME') as string
+  // NAME field is read by UseTools block from the connected block directly
+  // The generator itself doesn't use `name` — the key in the tools map is
+  // set by UseTools, not by the tool's own generator.
   const description = block.getFieldValue('DESCRIPTION') as string
 
   const escapedDescription = description.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
