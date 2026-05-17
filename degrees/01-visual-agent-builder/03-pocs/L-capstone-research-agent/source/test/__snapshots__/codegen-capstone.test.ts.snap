@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Capstone workspace codegen > BT-capstone-005-snapshot: capstone workspace codegen snapshot 1`] = `
+"import { generateText, tool, Output, stepCountIs } from 'ai';
+import { z } from 'zod';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink, tools: __tools } = {}) {
+  __sink?.('summary', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Summarize the research notes into a structured object with title, key_points, and sources.', output: Output.object({ schema: z.object({ title: z.string(), key_points: z.array(z.string()), sources: z.array(z.string()) }) }) })).output);
+  __sink?.('agent_result', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Research visual programming with LLMs and produce a structured summary', tools: { search: tool({
+    description: 'Web-search the topic and return result list',
+    inputSchema: z.object({ query: z.string() }),
+    execute: async (input) => {
+        return await __tools.search(input.query);
+    }
+  }), fetch: tool({
+    description: 'Fetch a URL and return its text content',
+    inputSchema: z.object({ url: z.string() }),
+    execute: async (input) => {
+        return await __tools.fetch(input.url);
+    }
+  }) }, toolChoice: 'auto', stopWhen: stepCountIs(5) })).text);
+}
+"
+`;

@@ -1,0 +1,240 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "ai_output_sink",
+        "id": "demo-sink",
+        "x": 50,
+        "y": 50,
+        "fields": {
+          "LABEL": "summary"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "ai_generate_object",
+              "id": "demo-generate-object",
+              "inputs": {
+                "MODEL": {
+                  "block": {
+                    "type": "ai_model",
+                    "id": "demo-model-2",
+                    "fields": {
+                      "PROVIDER": "anthropic",
+                      "NAME": "claude-haiku-4-5"
+                    }
+                  }
+                },
+                "SCHEMA": {
+                  "block": {
+                    "type": "ai_zod_object",
+                    "id": "demo-schema",
+                    "inputs": {
+                      "FIELDS": {
+                        "block": {
+                          "type": "ai_zod_field",
+                          "id": "demo-field-title",
+                          "fields": {
+                            "NAME": "title",
+                            "TYPE": "string",
+                            "OPTIONAL": false
+                          },
+                          "next": {
+                            "block": {
+                              "type": "ai_zod_field",
+                              "id": "demo-field-key-points",
+                              "fields": {
+                                "NAME": "key_points",
+                                "TYPE": "string[]",
+                                "OPTIONAL": false
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "ai_zod_field",
+                                  "id": "demo-field-sources",
+                                  "fields": {
+                                    "NAME": "sources",
+                                    "TYPE": "string[]",
+                                    "OPTIONAL": false
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "PROMPT": {
+                  "block": {
+                    "type": "ai_prompt",
+                    "id": "demo-go-prompt",
+                    "fields": {
+                      "TEXT": "Summarize the research notes into a structured object with title, key_points, and sources."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "next": {
+          "block": {
+            "type": "ai_output_sink",
+            "id": "demo-agent-sink",
+            "fields": {
+              "LABEL": "agent_result"
+            },
+            "inputs": {
+              "VALUE": {
+                "block": {
+                  "type": "ai_agent",
+                  "id": "demo-agent",
+                  "inputs": {
+                    "MODEL": {
+                      "block": {
+                        "type": "ai_model",
+                        "id": "demo-model-1",
+                        "fields": {
+                          "PROVIDER": "anthropic",
+                          "NAME": "claude-haiku-4-5"
+                        }
+                      }
+                    },
+                    "PROMPT": {
+                      "block": {
+                        "type": "ai_prompt",
+                        "id": "demo-agent-prompt",
+                        "fields": {
+                          "TEXT": "Research visual programming with LLMs and produce a structured summary"
+                        }
+                      }
+                    },
+                    "TOOLS": {
+                      "block": {
+                        "type": "ai_use_tools",
+                        "id": "demo-use-tools",
+                        "inputs": {
+                          "TOOL_0": {
+                            "block": {
+                              "type": "ai_tool",
+                              "id": "demo-search-tool",
+                              "fields": {
+                                "NAME": "search",
+                                "DESCRIPTION": "Web-search the topic and return result list"
+                              },
+                              "inputs": {
+                                "INPUT_SCHEMA": {
+                                  "block": {
+                                    "type": "ai_zod_object",
+                                    "id": "demo-search-schema",
+                                    "inputs": {
+                                      "FIELDS": {
+                                        "block": {
+                                          "type": "ai_zod_field",
+                                          "id": "demo-search-field-query",
+                                          "fields": {
+                                            "NAME": "query",
+                                            "TYPE": "string",
+                                            "OPTIONAL": false
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "BODY": {
+                                  "block": {
+                                    "type": "ai_tool_return",
+                                    "id": "demo-search-return",
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "ai_tool_call",
+                                          "id": "demo-search-call",
+                                          "fields": {
+                                            "TOOL_NAME": "search",
+                                            "ARG_FIELD": "input.query"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "TOOL_1": {
+                            "block": {
+                              "type": "ai_tool",
+                              "id": "demo-fetch-tool",
+                              "fields": {
+                                "NAME": "fetch",
+                                "DESCRIPTION": "Fetch a URL and return its text content"
+                              },
+                              "inputs": {
+                                "INPUT_SCHEMA": {
+                                  "block": {
+                                    "type": "ai_zod_object",
+                                    "id": "demo-fetch-schema",
+                                    "inputs": {
+                                      "FIELDS": {
+                                        "block": {
+                                          "type": "ai_zod_field",
+                                          "id": "demo-fetch-field-url",
+                                          "fields": {
+                                            "NAME": "url",
+                                            "TYPE": "string",
+                                            "OPTIONAL": false
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "BODY": {
+                                  "block": {
+                                    "type": "ai_tool_return",
+                                    "id": "demo-fetch-return",
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "ai_tool_call",
+                                          "id": "demo-fetch-call",
+                                          "fields": {
+                                            "TOOL_NAME": "fetch",
+                                            "ARG_FIELD": "input.url"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "STOP_WHEN": {
+                      "block": {
+                        "type": "ai_stop_condition",
+                        "id": "demo-stop",
+                        "fields": {
+                          "VARIANT": "stepCountIs",
+                          "N": 5
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

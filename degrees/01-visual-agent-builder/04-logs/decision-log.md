@@ -169,3 +169,38 @@ Append-only record of design and tooling decisions. Every entry names the decisi
 - **Trade-offs accepted**: `StreamSink` cannot observe tool-calls or step-boundaries in the stream. For full observability, users would need a custom `for await` over `fullStream` — outside scope of visual blocks.
 - **Reversibility**: easy (add a separate `FullStreamSink` block if needed)
 - **Revisit when**: L5 if streaming agent observability (tool-calls, step events) is needed in the UI.
+
+## 2026-05-17T02:00:00Z — Capstone: Tools injection: __tools map vs inline-emit
+
+- **Decision**: `__tools` injection (executor injects `{ search: searchStub, fetch: fetchStub }` into run()).
+- **Alternatives considered**: Inline emit — hardcode the canned data directly in the tool body as a JS literal array in the emitted code.
+- **Rationale**: (1) Injection keeps the Blockly workspace clean — the workspace JSON describes structure, not data. (2) The executor can swap stubs for real implementations without touching the workspace. (3) The `ai_tool_call` block (`await __tools.<name>(<arg>)`) is a reusable pattern for any tool stub, not just search/fetch.
+- **Trade-offs accepted**: The run() signature now includes `tools: __tools` — a backward-compatible addition. Emitted code for programs that don't use tools simply ignores the parameter.
+- **Reversibility**: easy (could revert to inline emit for simpler programs)
+- **Revisit when**: If tool stubs need to be configurable by the user (e.g., swap in different data sets).
+
+## 2026-05-17T02:00:01Z — Capstone: Agent → GenerateObject wiring strategy
+
+- **Decision**: Two separate OutputSink blocks (GenerateObject first, Agent second). They are independent — GenerateObject uses a static prompt, Agent uses its own prompt.
+- **Alternatives considered**: Wire Agent output as the GenerateObject prompt input (research-first-then-summarize).
+- **Rationale**: (1) The `ai_prompt` block only emits string literals — it cannot reference the output of another block. (2) A ConcatText or ExpressionRef block would be needed for dynamic wiring. (3) Two independent sinks demonstrate the complete block set without requiring a new block type.
+- **Trade-offs accepted**: The GenerateObject runs before the Agent. In a production research workflow, you'd want agent-first. This is documented in surprises.md.
+- **Reversibility**: easy (add ConcatText block + rewire)
+- **Revisit when**: Phase 9 (distillation) when a ConcatText/Reference block is designed.
+
+## 2026-05-17: Inner-repo consolidation
+
+The L-capstone POC was committed to a nested git repo at `degrees/01-visual-agent-builder/.git` (an accident — the capstone worker initialized a new repo). Phase-11 audit flagged this; we consolidated into the outer repo.
+
+**Original inner-repo commit history (preserved here for audit-trail provenance)**:
+```
+14e8255 test(regression): POC-L-capstone snapshot, schema, stopWhen, injection, demo validity
+e9f27f8 feat(capstone): POC-L-capstone implement stubbed tools, demo program, e2e capstone
+072c482 test(red): POC-L-capstone failing tests for research-and-summarize agent
+```
+
+The inner `.git` directory is being removed. The L-capstone source code, tests, snapshots, and TDD audit trail evidence (in `surprises.md`, `implementation-notes.md`, and the snapshot files) remain intact in the outer repo. The TDD audit trail can be reproduced from the worker's output JSON archived in this degree's documentation.
+
+After consolidation the outer repo will have:
+- A single squashed commit for L-capstone with the message body referencing the original three inner hashes (072c482 / e9f27f8 / 14e8255).
+- Separate commits for Phase 9 distillation and Phase 10 skill pack.

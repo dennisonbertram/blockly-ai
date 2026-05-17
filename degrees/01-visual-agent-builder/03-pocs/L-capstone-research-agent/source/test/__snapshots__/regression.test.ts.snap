@@ -1,0 +1,81 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RT-L5-001: snapshot lock — all L5 fixtures > agent-has-tool-call-stop fixture snapshot locked 1`] = `
+"import { generateText, tool, hasToolCall } from 'ai';
+import { z } from 'zod';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink, tools: __tools } = {}) {
+  __sink?.('output', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'What\\'s the weather in Tokyo?', tools: { weather: tool({
+    description: 'Get weather for a city',
+    inputSchema: z.object({ city: z.string() }),
+    execute: async (input) => {
+        return '{ temp: 70, conditions: \\'sunny\\' }';
+    }
+  }) }, toolChoice: 'auto', stopWhen: hasToolCall('weather') })).text);
+}
+"
+`;
+
+exports[`RT-L5-001: snapshot lock — all L5 fixtures > agent-multi-step fixture snapshot locked 1`] = `
+"import { generateText, tool, stepCountIs } from 'ai';
+import { z } from 'zod';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink, tools: __tools } = {}) {
+  __sink?.('output', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'What\\'s the weather in Tokyo?', tools: { weather: tool({
+    description: 'Get weather for a city',
+    inputSchema: z.object({ city: z.string() }),
+    execute: async (input) => {
+        return '{ temp: 70, conditions: \\'sunny\\' }';
+    }
+  }) }, toolChoice: 'auto', stopWhen: stepCountIs(3) })).text);
+}
+"
+`;
+
+exports[`RT-L5-001: snapshot lock — all L5 fixtures > generate-text-basic fixture snapshot locked 1`] = `
+"import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink, tools: __tools } = {}) {
+  __sink?.('output', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Say hello' })).text);
+}
+"
+`;
+
+exports[`RT-L5-001: snapshot lock — all L5 fixtures > stream-text-basic fixture snapshot locked 1`] = `
+"import { streamText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink, tools: __tools } = {}) {
+  for await (const __chunk of (streamText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Hello' })).textStream) {
+    __sink?.('out', __chunk);
+  }
+}
+"
+`;
+
+exports[`RT-capstone-001: snapshot lock — capstone workspace codegen > capstone workspace codegen snapshot locked 1`] = `
+"import { generateText, tool, Output, stepCountIs } from 'ai';
+import { z } from 'zod';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink, tools: __tools } = {}) {
+  __sink?.('summary', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Summarize the research notes into a structured object with title, key_points, and sources.', output: Output.object({ schema: z.object({ title: z.string(), key_points: z.array(z.string()), sources: z.array(z.string()) }) }) })).output);
+  __sink?.('agent_result', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Research visual programming with LLMs and produce a structured summary', tools: { search: tool({
+    description: 'Web-search the topic and return result list',
+    inputSchema: z.object({ query: z.string() }),
+    execute: async (input) => {
+        return await __tools.search(input.query);
+    }
+  }), fetch: tool({
+    description: 'Fetch a URL and return its text content',
+    inputSchema: z.object({ url: z.string() }),
+    execute: async (input) => {
+        return await __tools.fetch(input.url);
+    }
+  }) }, toolChoice: 'auto', stopWhen: stepCountIs(5) })).text);
+}
+"
+`;

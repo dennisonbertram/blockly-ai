@@ -1,0 +1,240 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "ai_output_sink",
+        "id": "capstone-sink",
+        "x": 50,
+        "y": 50,
+        "fields": {
+          "LABEL": "summary"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "ai_generate_object",
+              "id": "capstone-generate-object",
+              "inputs": {
+                "MODEL": {
+                  "block": {
+                    "type": "ai_model",
+                    "id": "capstone-model-2",
+                    "fields": {
+                      "PROVIDER": "anthropic",
+                      "NAME": "claude-haiku-4-5"
+                    }
+                  }
+                },
+                "SCHEMA": {
+                  "block": {
+                    "type": "ai_zod_object",
+                    "id": "capstone-schema",
+                    "inputs": {
+                      "FIELDS": {
+                        "block": {
+                          "type": "ai_zod_field",
+                          "id": "field-title",
+                          "fields": {
+                            "NAME": "title",
+                            "TYPE": "string",
+                            "OPTIONAL": false
+                          },
+                          "next": {
+                            "block": {
+                              "type": "ai_zod_field",
+                              "id": "field-key-points",
+                              "fields": {
+                                "NAME": "key_points",
+                                "TYPE": "string[]",
+                                "OPTIONAL": false
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "ai_zod_field",
+                                  "id": "field-sources",
+                                  "fields": {
+                                    "NAME": "sources",
+                                    "TYPE": "string[]",
+                                    "OPTIONAL": false
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "PROMPT": {
+                  "block": {
+                    "type": "ai_prompt",
+                    "id": "capstone-go-prompt",
+                    "fields": {
+                      "TEXT": "Summarize the research notes into a structured object with title, key_points, and sources."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "next": {
+          "block": {
+            "type": "ai_output_sink",
+            "id": "capstone-agent-sink",
+            "fields": {
+              "LABEL": "agent_result"
+            },
+            "inputs": {
+              "VALUE": {
+                "block": {
+                  "type": "ai_agent",
+                  "id": "capstone-agent",
+                  "inputs": {
+                    "MODEL": {
+                      "block": {
+                        "type": "ai_model",
+                        "id": "capstone-model-1",
+                        "fields": {
+                          "PROVIDER": "anthropic",
+                          "NAME": "claude-haiku-4-5"
+                        }
+                      }
+                    },
+                    "PROMPT": {
+                      "block": {
+                        "type": "ai_prompt",
+                        "id": "capstone-agent-prompt",
+                        "fields": {
+                          "TEXT": "Research visual programming with LLMs and produce a structured summary"
+                        }
+                      }
+                    },
+                    "TOOLS": {
+                      "block": {
+                        "type": "ai_use_tools",
+                        "id": "capstone-use-tools",
+                        "inputs": {
+                          "TOOL_0": {
+                            "block": {
+                              "type": "ai_tool",
+                              "id": "capstone-search-tool",
+                              "fields": {
+                                "NAME": "search",
+                                "DESCRIPTION": "Web-search the topic and return result list"
+                              },
+                              "inputs": {
+                                "INPUT_SCHEMA": {
+                                  "block": {
+                                    "type": "ai_zod_object",
+                                    "id": "search-schema",
+                                    "inputs": {
+                                      "FIELDS": {
+                                        "block": {
+                                          "type": "ai_zod_field",
+                                          "id": "search-field-query",
+                                          "fields": {
+                                            "NAME": "query",
+                                            "TYPE": "string",
+                                            "OPTIONAL": false
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "BODY": {
+                                  "block": {
+                                    "type": "ai_tool_return",
+                                    "id": "search-return",
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "ai_tool_call",
+                                          "id": "search-call",
+                                          "fields": {
+                                            "TOOL_NAME": "search",
+                                            "ARG_FIELD": "input.query"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "TOOL_1": {
+                            "block": {
+                              "type": "ai_tool",
+                              "id": "capstone-fetch-tool",
+                              "fields": {
+                                "NAME": "fetch",
+                                "DESCRIPTION": "Fetch a URL and return its text content"
+                              },
+                              "inputs": {
+                                "INPUT_SCHEMA": {
+                                  "block": {
+                                    "type": "ai_zod_object",
+                                    "id": "fetch-schema",
+                                    "inputs": {
+                                      "FIELDS": {
+                                        "block": {
+                                          "type": "ai_zod_field",
+                                          "id": "fetch-field-url",
+                                          "fields": {
+                                            "NAME": "url",
+                                            "TYPE": "string",
+                                            "OPTIONAL": false
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "BODY": {
+                                  "block": {
+                                    "type": "ai_tool_return",
+                                    "id": "fetch-return",
+                                    "inputs": {
+                                      "VALUE": {
+                                        "block": {
+                                          "type": "ai_tool_call",
+                                          "id": "fetch-call",
+                                          "fields": {
+                                            "TOOL_NAME": "fetch",
+                                            "ARG_FIELD": "input.url"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "STOP_WHEN": {
+                      "block": {
+                        "type": "ai_stop_condition",
+                        "id": "capstone-stop",
+                        "fields": {
+                          "VARIANT": "stepCountIs",
+                          "N": 5
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
