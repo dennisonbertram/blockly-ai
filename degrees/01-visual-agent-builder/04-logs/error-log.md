@@ -16,4 +16,34 @@ Append-only record of errors encountered during this degree. Every entry capture
 
 ## Entries
 
-No entries yet.
+## 2026-05-17T00:14:30Z — esbuild build script blocked by pnpm
+
+- **Command / context**: `pnpm install` in L1 source dir
+- **Error message**: `Ignored build scripts: esbuild@0.21.5. Run "pnpm approve-builds"`
+- **Root cause**: pnpm 10.x blocks build scripts by default. esbuild requires its postinstall script to download the native binary.
+- **Fix**: Added `pnpm-workspace.yaml` with `onlyBuiltDependencies: [esbuild]`, then re-ran `pnpm install`.
+- **Related decision / gotcha**: Not in research docs. pnpm 10.x security default. See decision-log.
+
+## 2026-05-17T00:15:10Z — Blockly.inject crashes in happy-dom (FocusManager)
+
+- **Command / context**: `pnpm test` — workspace-mount.test.tsx
+- **Error message**: `TypeError: Cannot read properties of undefined (reading 'Symbol(listeners)')` at `addGlobalEventListener` in FocusManager
+- **Root cause**: Blockly 12.5.1's `FocusManager` uses `addEventListener` on `window` via an internal `EventTarget` subclass. happy-dom's implementation is incompatible.
+- **Fix**: Mocked `Blockly.inject` using `vi.mock` + `vi.hoisted` so workspace tests don't trigger Blockly's DOM-heavy init.
+- **Related decision / gotcha**: Research doc noted jsdom incompatibility. Same applies to happy-dom. Decision: use mocked inject for unit tests; Playwright required for UI tests.
+
+## 2026-05-17T00:15:40Z — vi.mock factory can't access outer variables
+
+- **Command / context**: `pnpm test` — workspace-mount.test.tsx
+- **Error message**: `ReferenceError: Cannot access 'mockInject' before initialization`
+- **Root cause**: `vi.mock` is hoisted before variable declarations. The `mockInject` variable wasn't yet initialized when the factory ran.
+- **Fix**: Used `vi.hoisted(() => { return { mockInject: vi.fn() } })` to declare variables that survive hoisting.
+- **Related decision / gotcha**: Vitest docs cover this; pattern is `vi.hoisted`.
+
+## 2026-05-17T00:15:50Z — vi.mock spread doesn't include Blockly.Blocks
+
+- **Command / context**: `pnpm test` — workspace-mount.test.tsx
+- **Error message**: `[vitest] No "Blocks" export is defined on the "blockly/core" mock.`
+- **Root cause**: `Blockly.Blocks` is a runtime-mutated property, not a static named export. `{ ...actual }` spread doesn't capture it.
+- **Fix**: Explicitly added `Blocks: actual.Blocks` to the mock return object.
+- **Related decision / gotcha**: ESM module namespace objects are not plain JS objects. Runtime mutations aren't part of the static export list.

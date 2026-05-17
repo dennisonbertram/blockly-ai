@@ -16,4 +16,52 @@ Append-only record of every meaningful command run during this degree. "Meaningf
 
 ## Entries
 
-No entries yet.
+## 2026-05-17T00:12:00Z — L1 pnpm install
+
+- **Working directory**: `degrees/01-visual-agent-builder/03-pocs/L1-blockly-hello/source`
+- **Command**: `pnpm install`
+- **Exit code**: 0
+- **Observation**: Installed 221 packages. esbuild@0.21.5 build script blocked; fixed with `pnpm-workspace.yaml` setting `onlyBuiltDependencies: [esbuild]`.
+- **Notes**: Required `pnpm approve-builds` workaround via pnpm-workspace.yaml.
+
+## 2026-05-17T00:13:48Z — L1 RED test run
+
+- **Working directory**: `degrees/01-visual-agent-builder/03-pocs/L1-blockly-hello/source`
+- **Command**: `pnpm test`
+- **Exit code**: 1
+- **Observation**: 3 test suites failed, 0 tests ran. All failures were "Failed to resolve import" — correct RED state.
+
+## 2026-05-17T00:17:28Z — L1 GREEN test run
+
+- **Working directory**: `degrees/01-visual-agent-builder/03-pocs/L1-blockly-hello/source`
+- **Command**: `pnpm test`
+- **Exit code**: 0
+- **Observation**: 3 test files, 13 tests, all passing.
+
+## 2026-05-17T00:18:11Z — L1 REGRESSION test run
+
+- **Working directory**: `degrees/01-visual-agent-builder/03-pocs/L1-blockly-hello/source`
+- **Command**: `pnpm test`
+- **Exit code**: 0
+- **Observation**: 4 test files, 20 tests, 4 snapshots written, all passing.
+
+## 2026-05-17T00:18:20Z — L1 RED git commit
+
+- **Working directory**: `degrees/01-visual-agent-builder/blockly-ai`
+- **Command**: `git commit -m "test(L1): add failing tests for blockly hello — RED"`
+- **Exit code**: 0
+- **Observation**: hash bd36b5f. 16 files changed.
+
+## 2026-05-17T00:18:30Z — L1 GREEN git commit
+
+- **Working directory**: `degrees/01-visual-agent-builder/blockly-ai`
+- **Command**: `git commit -m "feat(L1): implement blockly hello — GREEN"`
+- **Exit code**: 0
+- **Observation**: hash 540397e. 8 files changed.
+
+## 2026-05-17T00:18:40Z — L1 REGRESSION git commit
+
+- **Working directory**: `degrees/01-visual-agent-builder/blockly-ai`
+- **Command**: `git commit -m "test(L1): regression snapshots and Strict Mode guard — REGRESSION"`
+- **Exit code**: 0
+- **Observation**: hash a6e56ec. 2 files changed.
