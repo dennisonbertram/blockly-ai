@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generate(workspace) — L3 block codegen > BT-001: tool-only fixture snapshot 1`] = `
+"import { generateText } from 'ai';
+
+export default async function run({ model: __model_provider, sink: __sink } = {}) {
+  __sink?.('tool_def', ({}));
+}
+"
+`;
+
+exports[`generate(workspace) — L3 block codegen > BT-002: generate-text-with-tool fixture snapshot 1`] = `
+"import { generateText, stepCountIs } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink } = {}) {
+  __sink?.('output', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'What is the weather?', tools: ({}), toolChoice: 'auto', stopWhen: stepCountIs(5) })).text);
+}
+"
+`;
+
+exports[`generate(workspace) — L3 block codegen > BT-003: generate-object fixture snapshot 1`] = `
+"import { generateText } from 'ai';
+
+export default async function run({ model: __model_provider, sink: __sink } = {}) {
+  __sink?.('structured', (undefined));
+}
+"
+`;
+
+exports[`generate(workspace) — L3 block codegen > BT-004: generate-object-optional-field fixture snapshot 1`] = `
+"import { generateText } from 'ai';
+
+export default async function run({ model: __model_provider, sink: __sink } = {}) {
+  __sink?.('structured', (undefined));
+}
+"
+`;

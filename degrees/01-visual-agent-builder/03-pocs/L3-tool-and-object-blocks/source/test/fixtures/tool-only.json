@@ -1,0 +1,66 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "ai_output_sink",
+        "id": "sink-1",
+        "x": 50,
+        "y": 50,
+        "fields": {
+          "LABEL": "tool_def"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "ai_tool",
+              "id": "tool-1",
+              "fields": {
+                "NAME": "weather",
+                "DESCRIPTION": "Get weather for a city"
+              },
+              "inputs": {
+                "INPUT_SCHEMA": {
+                  "block": {
+                    "type": "ai_zod_object",
+                    "id": "schema-1",
+                    "inputs": {
+                      "FIELDS": {
+                        "block": {
+                          "type": "ai_zod_field",
+                          "id": "field-1",
+                          "fields": {
+                            "NAME": "city",
+                            "TYPE": "string",
+                            "OPTIONAL": false
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "BODY": {
+                  "block": {
+                    "type": "ai_tool_return",
+                    "id": "return-1",
+                    "inputs": {
+                      "VALUE": {
+                        "block": {
+                          "type": "ai_prompt",
+                          "id": "retval-1",
+                          "fields": {
+                            "TEXT": "{ temp: 70, conditions: 'sunny' }"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

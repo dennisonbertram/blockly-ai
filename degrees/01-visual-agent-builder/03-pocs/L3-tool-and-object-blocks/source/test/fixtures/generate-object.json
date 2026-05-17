@@ -1,0 +1,86 @@
+{
+  "blocks": {
+    "languageVersion": 0,
+    "blocks": [
+      {
+        "type": "ai_output_sink",
+        "id": "sink-1",
+        "x": 50,
+        "y": 50,
+        "fields": {
+          "LABEL": "structured"
+        },
+        "inputs": {
+          "VALUE": {
+            "block": {
+              "type": "ai_generate_object",
+              "id": "genobj-1",
+              "inputs": {
+                "MODEL": {
+                  "block": {
+                    "type": "ai_model",
+                    "id": "model-1",
+                    "fields": {
+                      "PROVIDER": "anthropic",
+                      "NAME": "claude-haiku-4-5"
+                    }
+                  }
+                },
+                "SCHEMA": {
+                  "block": {
+                    "type": "ai_zod_object",
+                    "id": "schema-1",
+                    "inputs": {
+                      "FIELDS": {
+                        "block": {
+                          "type": "ai_zod_field",
+                          "id": "field-1",
+                          "fields": {
+                            "NAME": "title",
+                            "TYPE": "string",
+                            "OPTIONAL": false
+                          },
+                          "next": {
+                            "block": {
+                              "type": "ai_zod_field",
+                              "id": "field-2",
+                              "fields": {
+                                "NAME": "summary",
+                                "TYPE": "string",
+                                "OPTIONAL": false
+                              },
+                              "next": {
+                                "block": {
+                                  "type": "ai_zod_field",
+                                  "id": "field-3",
+                                  "fields": {
+                                    "NAME": "tags",
+                                    "TYPE": "string[]",
+                                    "OPTIONAL": false
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "PROMPT": {
+                  "block": {
+                    "type": "ai_prompt",
+                    "id": "prompt-1",
+                    "fields": {
+                      "TEXT": "summarize X"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}
