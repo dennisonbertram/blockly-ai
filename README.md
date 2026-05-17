@@ -1,21 +1,47 @@
 # Blockly + AI — AI School Ecosystem
 
-## Purpose
-
-This repository is an AI School ecosystem focused on building agent-ready skill packs that demonstrate how to combine Google Blockly with the Vercel AI SDK and modern LLMs. The intent is to produce structured, evidence-backed knowledge that downstream LLM agents can consume to build their own visual agent-builder systems.
+Agent-ready skill packs on combining Google Blockly with the Vercel AI SDK and LLMs.
 
 ## Audience
 
-The primary audience is LLM agents. Every artifact — research notes, POCs, distillation, skill pack — is written so a downstream model can read it, follow the references, and reliably reproduce or extend the work. Human readers are welcome but secondary.
+Autonomous LLM coding agents. The skill packs assume the reader is an LLM building a project that combines visual programming with modern AI runtimes.
 
 ## Structure
 
-The repo is organized into two top-level concerns: `shared/` for cross-degree fundamentals (glossary, platform fundamentals, conventions) and `degrees/` for individual learning tracks. Each degree follows the AI School phase layout (`00-metadata` → `07-evaluation`) so that knowledge progresses from intent through research, planning, POCs, logs, distillation, and a navigable skill pack.
+- `shared/` — cross-degree fundamentals (glossary, platform fundamentals, conventions)
+- `degrees/01-visual-agent-builder/` — **first degree** (✅ complete): a visually-composed agent builder using Blockly 12.5.1 + Vercel AI SDK v6.0.184. Six POCs (L1–L5 + capstone), 200+ tests, full TDD audit trail, deployed-capstone simulation.
+- `docs/context/` — command intent + session context
 
 ## Status
 
-In-progress. The first degree lives at `degrees/01-visual-agent-builder` and is currently in the scaffolding phase; no research, planning, or POC work has been executed yet.
+Degree 01 (`visual-agent-builder`): **complete** as of 2026-05-17. Phase 11 audit verdict: READY-FOR-CLOSE (all 4 quality gates PASS).
+
+To consume the skill pack, start at `degrees/01-visual-agent-builder/06-skill-pack/`:
+- `README.md` — landing page for the skill pack
+- `quickstart.md` — fastest happy path
+- `curriculum.md` — recommended order
+- `agent-instructions.md` — instructions tailored for LLM agents
 
 ## Doctrine
 
-The portable AI School doctrine that governs how this repo is structured and operated lives at `../instructions/instructions.md` in the sibling `instructions/` repo. Refer to that document for phase definitions, evidence rules, and append-only logging discipline.
+The portable doctrine that produced this degree lives at `../instructions/instructions.md` (not copied into this repo — it's the ecosystem-wide protocol).
+
+## Pinned versions (Phase 1 confirmed, exact)
+
+| Package | Version |
+|---|---|
+| `blockly` | `12.5.1` |
+| `ai` | `6.0.184` |
+| `@ai-sdk/anthropic` | `3.0.78` |
+| `@ai-sdk/openai` | `3.0.64` |
+| Node | `≥ 20` |
+| Next.js | `15.x` |
+
+## Future degrees (planned)
+
+The ecosystem is structured for additional degrees. Candidate angles surfaced during Phase 11 evaluation:
+- NL ⇄ Blockly Round-Trip — LLMs generate Blockly XML from natural-language prompts; reverse-direction explanations.
+- LLM-Powered Custom Block DSL — LLMs help designers define new block types from natural-language specs.
+- Agentic Workflows on Blockly — long-running, event-driven, human-in-the-loop agent workflows visualized as blocks.
+
+See `degrees/01-visual-agent-builder/07-evaluation/future-work.md` for the full list.
