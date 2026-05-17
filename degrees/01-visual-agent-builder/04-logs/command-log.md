@@ -65,3 +65,39 @@ Append-only record of every meaningful command run during this degree. "Meaningf
 - **Command**: `git commit -m "test(L1): regression snapshots and Strict Mode guard — REGRESSION"`
 - **Exit code**: 0
 - **Observation**: hash a6e56ec. 2 files changed.
+
+## 2026-05-17T00:26:00Z — L2 pnpm install (first attempt — version mismatch)
+
+- **Working directory**: `degrees/01-visual-agent-builder/03-pocs/L2-single-generate-text-block/source`
+- **Command**: `pnpm install`
+- **Exit code**: 1
+- **Observation**: `ERR_PNPM_NO_MATCHING_VERSION No matching version found for @ai-sdk/openai@3.0.75. The latest release of @ai-sdk/openai is "3.0.64".`
+- **Notes**: Research file specified `@ai-sdk/openai@3.0.75` but that version doesn't exist. Corrected pin to `3.0.64`.
+
+## 2026-05-17T00:26:30Z — L2 pnpm install (success)
+
+- **Working directory**: `degrees/01-visual-agent-builder/03-pocs/L2-single-generate-text-block/source`
+- **Command**: `pnpm install`
+- **Exit code**: 0
+- **Observation**: Installed with `ai@6.0.184`, `@ai-sdk/anthropic@3.0.78`, `@ai-sdk/openai@3.0.64`, `blockly@12.5.1`.
+
+## 2026-05-17T00:27:25Z — L2 RED test run
+
+- **Working directory**: `degrees/01-visual-agent-builder/03-pocs/L2-single-generate-text-block/source`
+- **Command**: `pnpm test`
+- **Exit code**: 1
+- **Observation**: 2 failed suites (codegen + execute), 2 passed (block-defs + workspace-mount). 7 failed, 10 passed. Meaningful behavioral failures confirmed.
+
+## 2026-05-17T00:29:56Z — L2 GREEN test run
+
+- **Working directory**: `degrees/01-visual-agent-builder/03-pocs/L2-single-generate-text-block/source`
+- **Command**: `pnpm test`
+- **Exit code**: 0
+- **Observation**: 4 test files, 17 tests, all passing.
+
+## 2026-05-17T00:30:56Z — L2 REGRESSION test run
+
+- **Working directory**: `degrees/01-visual-agent-builder/03-pocs/L2-single-generate-text-block/source`
+- **Command**: `pnpm test`
+- **Exit code**: 0
+- **Observation**: 5 test files, 30 tests, 4 snapshots written, all passing.

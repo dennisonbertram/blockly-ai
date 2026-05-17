@@ -1,0 +1,40 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RT-001: snapshot lock — generated code for all fixtures > empty workspace snapshot 1`] = `
+"import { generateText } from 'ai';
+
+export default async function run({ model: __model_provider, sink: __sink } = {}) {
+
+}
+"
+`;
+
+exports[`RT-001: snapshot lock — generated code for all fixtures > generate-text-openai fixture snapshot 1`] = `
+"import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+
+export default async function run({ model: __model_provider, sink: __sink } = {}) {
+  __sink?.('output', (await generateText({ model: (__model_provider ?? openai('gpt-4o-mini')), prompt: 'Hello' })).text);
+}
+"
+`;
+
+exports[`RT-001: snapshot lock — generated code for all fixtures > generate-text-with-system fixture snapshot 1`] = `
+"import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink } = {}) {
+  __sink?.('output', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Hello', system: 'You are a helpful assistant.' })).text);
+}
+"
+`;
+
+exports[`RT-001: snapshot lock — generated code for all fixtures > single-generate-text fixture snapshot 1`] = `
+"import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+
+export default async function run({ model: __model_provider, sink: __sink } = {}) {
+  __sink?.('output', (await generateText({ model: (__model_provider ?? anthropic('claude-haiku-4-5')), prompt: 'Hello' })).text);
+}
+"
+`;

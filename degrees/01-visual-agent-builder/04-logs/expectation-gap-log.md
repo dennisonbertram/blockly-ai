@@ -35,6 +35,24 @@ Append-only record of moments where reality diverged from prior expectation. The
 - **Impact**: BT-006 test updated: `load()` is wrapped in try/catch; the assertion is only about `generate()` not throwing.
 - **Follow-up**: Document in `known-failure-modes.md` that `load()` is strict about block types.
 
+## 2026-05-17T00:26:00Z — L2: @ai-sdk/openai@3.0.75 does not exist
+
+- **Expected**: `@ai-sdk/openai@3.0.75` as specified in `version-and-current-api.md`.
+- **Actual**: `ERR_PNPM_NO_MATCHING_VERSION` — latest is `3.0.64` as of 2026-05-17.
+- **Source of expectation**: `01-research/vercel-ai-sdk/version-and-current-api.md` — "Pinned Stable Versions: @ai-sdk/openai@3.0.75".
+- **Source of reality**: `npm view @ai-sdk/openai version` → `3.0.64`.
+- **Impact**: Pinned to `3.0.64` in `package.json`. Documented in `surprises.md` and `error-log.md`.
+- **Follow-up**: Update `version-and-current-api.md` to reflect `@ai-sdk/openai@3.0.64`.
+
+## 2026-05-17T00:29:00Z — L2: Vitest temp-file dynamic import does not work for /tmp files
+
+- **Expected**: Task description said "Vitest supports [temp-file + dynamic import] fine."
+- **Actual**: Vitest/Vite refuses to load files outside the project root via `file://` URL, even though the file exists on disk.
+- **Source of expectation**: Task contract statement: "Recommendation: temp-file write + dynamic import via a `file://` URL. Vitest supports this fine."
+- **Source of reality**: `Error: Failed to load url /tmp/blockly-l2-test-xxx.mjs ... Does the file exist?` — file exists, Vite won't load it.
+- **Impact**: Had to use `new Function` injection approach instead. Documented in `decision-log.md` and `surprises.md`.
+- **Follow-up**: Update task contract for L3+ to use `new Function` injection or `node:vm` as primary strategy.
+
 ## 2026-05-17T00:16:20Z — deps.inline deprecated in Vitest 3.x
 
 - **Expected**: `deps.inline: ['blockly']` from `02-planning/test-strategy.md` would work without warning.

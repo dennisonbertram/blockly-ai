@@ -44,6 +44,33 @@ Append-only record of design and tooling decisions. Every entry names the decisi
 - **Reversibility**: easy (would require fixture changes)
 - **Revisit when**: If the greet block is redesigned for L2+ with a simpler UX.
 
+## 2026-05-17T00:28:00Z — L2: Async codegen approach: post-process vs. subclass finish()
+
+- **Decision**: Implement async wrapping as a post-processor (`generateAsyncModule()`) rather than subclassing `javascriptGenerator` and overriding `finish()`.
+- **Alternatives considered**: Subclass `javascriptGenerator.constructor` (planner's preferred approach). Post-process the raw `workspaceToCode()` output.
+- **Rationale**: Blockly exports `javascriptGenerator` as a singleton instance. The class is accessible via `Object.getPrototypeOf(javascriptGenerator).constructor` but TypeScript doesn't know the constructor's signature, making subclassing fragile and untyped. The post-process approach is strictly equivalent: it intercepts the output of `workspaceToCode` and wraps it — exactly what `finish()` does.
+- **Trade-offs accepted**: The post-processor is a separate function call rather than a method override. Callers must call `generateAsyncModule(workspace)` instead of `asyncGenerator.workspaceToCode(workspace)`. The API is slightly more explicit but less surprising.
+- **Reversibility**: easy (refactor to subclass if needed in L3+)
+- **Revisit when**: L3+ if multiple generators (async vs. sync) need to share an interface.
+
+## 2026-05-17T00:28:30Z — L2: Compile-execute strategy: AsyncFunction injection vs. temp-file dynamic import
+
+- **Decision**: Use `new Function('generateText', 'anthropic', 'openai', body)` with injected modules for test execution.
+- **Alternatives considered**: Write emitted source to a temp `.mjs` file and use `await import('file:///tmp/...')`.
+- **Rationale**: The temp-file approach fails in Vitest because Vite resolves dynamic imports through its module graph and refuses to load files outside the project root. The `new Function` approach strips ES import/export syntax and injects the real (or mock) modules as parameters — the same code runs, just in a different execution context.
+- **Trade-offs accepted**: The test helper (`buildRunnable()`) adds complexity. The emitted module-mode code is not literally "run as-is" in tests — it's adapted. This is documented in both `implementation-notes.md` and `surprises.md`.
+- **Reversibility**: easy (swap to temp-file if Vitest adds file:// support for arbitrary paths)
+- **Revisit when**: L5 (Node.js server-side execution) — a proper vm sandbox or subprocess approach will be needed anyway.
+
+## 2026-05-17T00:28:45Z — L2: Module vs. injected mode for emitted code
+
+- **Decision**: Always emit module mode (with ES `import`/`export`). Tests use an injection adapter, not a separate "injected mode" generator.
+- **Alternatives considered**: Two generator modes: module mode (production) and injected mode (parameters for testing).
+- **Rationale**: A single output format is simpler and less error-prone. The test adapter is 20 lines and clearly separated from the generator. Maintaining two codegen modes would require duplicating tests.
+- **Trade-offs accepted**: Tests cannot run the emitted code without the `buildRunnable()` adapter.
+- **Reversibility**: easy
+- **Revisit when**: If the emitted code is tested in a Node.js subprocess or browser E2E at L5.
+
 ## 2026-05-17T00:15:00Z — Mock Blockly.inject in workspace-mount tests
 
 - **Decision**: Mock `Blockly.inject` in `workspace-mount.test.tsx` instead of testing with real injection.
